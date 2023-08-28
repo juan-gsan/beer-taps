@@ -25,10 +25,14 @@ Follow these steps to set up and run the Beer Tap Dispenser API:
 
 ## API Endpoints
 
+### Beer
+
 - `GET /Beer`: Retrieve a list of all dispensers.
 - `GET /Beer/{id}`: Retrieve details of a specific dispenser.
 - `POST /Beer`: Create a new dispenser.
 - `DELETE /Beer/{id}`: Delete an existing dispenser.
+
+### Usage
 
 - `GET /Usage`: Retrieve a list of all dispenser usages.
 - `GET /Usage/{id}`: Retrieve details of a specific dispenser usage.
@@ -62,6 +66,7 @@ Follow these steps to set up and run the Beer Tap Dispenser API:
 
 - .NET
 - C#
+- SQL (SQL Server)
 
 ## Contact
 
