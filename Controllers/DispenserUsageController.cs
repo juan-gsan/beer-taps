@@ -38,9 +38,6 @@ public class UsageController : ControllerBase
       return NotFound("Dispenser not found");
     }
 
-    dispenser.Status = true;
-    dispenser.TimesUsed += 1;
-
     var newUsage = new DispenserUsage {
       DispenserId = dispenser.Id,
       StartTime = DateTime.Now,
@@ -69,12 +66,11 @@ public class UsageController : ControllerBase
       dispenserUsage.Amount = amountDispensed;
       dispenserUsage.Cost = cost;
 
-      dispenser.Status = false;
       dispenser.TotalAmount += amountDispensed; 
       dispenser.TotalCost += cost;
 
       this._DBContext.SaveChanges();
-      return Ok(true);
+      return Ok(dispenserUsage);
     } else {
       return NotFound();
     }

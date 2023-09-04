@@ -48,4 +48,23 @@ public class BeerController : ControllerBase
     return Ok(_dispenser);
 }
 
+    [HttpPatch("{id}")]
+
+    public IActionResult Toggle(int id)
+    {
+        var dispenser = this._DBContext.Dispenser.FirstOrDefault(element => element.Id == id);
+        
+        if(dispenser == null) {
+            return NotFound("Dispenser not found");
+        }
+
+        dispenser.Status = !dispenser.Status;
+
+        if (dispenser.Status) {
+            dispenser.TimesUsed += 1;
+        }
+
+        this._DBContext.SaveChanges();
+        return Ok(dispenser);
+    }
 }
