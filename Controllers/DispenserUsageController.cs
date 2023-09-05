@@ -29,7 +29,7 @@ public class UsageController : ControllerBase
     return Ok(dispenserUsage);
   }
 
-  [HttpPost("")]
+  [HttpPost("{id}")]
 
   public IActionResult Open(int id)
   {
