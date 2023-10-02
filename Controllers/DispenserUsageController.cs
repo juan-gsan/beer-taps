@@ -55,8 +55,8 @@ public class UsageController : ControllerBase
 
   public IActionResult Close(int id)
   {
-    var dispenser = this._DBContext.Dispenser.FirstOrDefault(element => element.Id == id);
-    var dispenserUsage = this._DBContext.DispenserUsage.FirstOrDefault(usage => usage.DispenserId == id);
+    var dispenserUsage = this._DBContext.DispenserUsage.FirstOrDefault(usage => usage.Id == id);
+    var dispenser = this._DBContext.Dispenser.FirstOrDefault(element => element.Id == dispenserUsage!.DispenserId);
 
     if (dispenserUsage != null && dispenser != null) {
       dispenserUsage.EndTime = DateTime.Now;
