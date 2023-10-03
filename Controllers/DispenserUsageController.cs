@@ -51,35 +51,9 @@ public class UsageController : ControllerBase
     return Ok(newUsage);
   }
 
-  [HttpPatch("update/{id}")]
-
-  public IActionResult UpdateUsage(int id)
-  {
-    var dispenserUsage = this._DBContext.DispenserUsage.FirstOrDefault(usage => usage.Id == id);
-    var dispenser = this._DBContext.Dispenser.FirstOrDefault(element => element.Id == dispenserUsage!.DispenserId);
-
-    if (dispenserUsage != null && dispenser != null) {
-
-      dispenserUsage.EndTime = DateTime.Now;
-      TimeSpan timeDifference = DateTime.Now - dispenserUsage.StartTime;
-      decimal amountDispensed = (decimal)timeDifference.TotalSeconds * dispenser.FlowVolume;
-      decimal cost = amountDispensed * dispenser.Cost;
-      dispenserUsage.Amount = amountDispensed;
-      dispenserUsage.Cost = cost;
-
-      dispenser.TotalAmount += amountDispensed; 
-      dispenser.TotalCost += cost;
-
-      this._DBContext.SaveChanges();
-      return Ok(dispenserUsage);
-    } else {
-      return NotFound();
-    }
-  }
-
   [HttpPatch("{id}")]
 
-  public IActionResult Close(int id)
+  public IActionResult Update(int id)
   {
     var dispenserUsage = this._DBContext.DispenserUsage.FirstOrDefault(usage => usage.Id == id);
     var dispenser = this._DBContext.Dispenser.FirstOrDefault(element => element.Id == dispenserUsage!.DispenserId);
