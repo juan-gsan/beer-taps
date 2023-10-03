@@ -23,4 +23,5 @@ public class Dispenser
     public int TimesUsed { get; set; } 
 
     public decimal TotalCost { get; set; }
+    
 }
