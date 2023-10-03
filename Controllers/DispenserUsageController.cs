@@ -38,8 +38,6 @@ public class UsageController : ControllerBase
       return NotFound("Dispenser not found");
     }
 
-    dispenser.Status = true;
-
     var newUsage = new DispenserUsage {
       DispenserId = dispenser.Id,
       StartTime = DateTime.Now,
@@ -87,7 +85,6 @@ public class UsageController : ControllerBase
     var dispenser = this._DBContext.Dispenser.FirstOrDefault(element => element.Id == dispenserUsage!.DispenserId);
 
     if (dispenserUsage != null && dispenser != null) {
-      dispenser.Status = false;
 
       dispenserUsage.EndTime = DateTime.Now;
       TimeSpan timeDifference = DateTime.Now - dispenserUsage.StartTime;
