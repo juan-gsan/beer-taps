@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BeerTap.Models;
+
 namespace BeerTap.Controllers;
 
 [ApiController]
@@ -7,25 +8,27 @@ namespace BeerTap.Controllers;
 
 public class UsageController : ControllerBase
 {
-  private readonly BeerTapsContext _DBContext;
+  private readonly DispenserUsageRepository _usageRepository;
+  private readonly DispenserRepository _dispenserRepository;
 
-  public UsageController(BeerTapsContext dbContext)
+  public UsageController(DispenserUsageRepository usageRepository, DispenserRepository dispenserRepository)
   {
-    this._DBContext = dbContext;
+    this._usageRepository = usageRepository;
+    this._dispenserRepository = dispenserRepository;
   }
 
   [HttpGet("")]
   
   public IActionResult GetAll()
   {
-    var dispenserUsages = this._DBContext.DispenserUsage.ToList();
+    var dispenserUsages = this._usageRepository.GetAll();
     return Ok(dispenserUsages);
   }
 
   [HttpGet("{id}")]
   public IActionResult GetById(int id)
   {
-    var dispenserUsage = this._DBContext.DispenserUsage.FirstOrDefault(element => element.Id == id);
+    var dispenserUsage = this._usageRepository.GetById(id);
     return Ok(dispenserUsage);
   }
 
@@ -33,7 +36,7 @@ public class UsageController : ControllerBase
 
   public IActionResult Open(int id)
   {
-    var dispenser = this._DBContext.Dispenser.FirstOrDefault(element => element.Id == id);
+    var dispenser = this._dispenserRepository.GetById(id);
     if(dispenser == null) {
       return NotFound("Dispenser not found");
     }
@@ -46,8 +49,8 @@ public class UsageController : ControllerBase
       Cost = 0.0M
     };
 
-    this._DBContext.DispenserUsage.Add(newUsage);
-    this._DBContext.SaveChanges();
+    dispenser.Status = !dispenser.Status;
+    this._usageRepository.Create(newUsage);
     return Ok(newUsage);
   }
 
@@ -55,8 +58,35 @@ public class UsageController : ControllerBase
 
   public IActionResult Update(int id)
   {
-    var dispenserUsage = this._DBContext.DispenserUsage.FirstOrDefault(usage => usage.Id == id);
-    var dispenser = this._DBContext.Dispenser.FirstOrDefault(element => element.Id == dispenserUsage!.DispenserId);
+    var dispenserUsage = this._usageRepository.GetById(id);
+    var dispenserId = dispenserUsage!.DispenserId;
+    var dispenser = this._dispenserRepository.GetById(dispenserId);
+
+    if (dispenserUsage != null && dispenser != null) {
+
+      decimal amountDispensed = dispenser.FlowVolume;
+      decimal cost = amountDispensed * dispenser.Cost;
+      dispenserUsage.Amount += amountDispensed;
+      dispenserUsage.Cost += cost;
+
+      dispenser.TotalAmount += amountDispensed; 
+      dispenser.TotalCost += cost;
+
+      this._usageRepository.Update(dispenserUsage);
+      this._dispenserRepository.Update(dispenser);
+      return Ok(dispenserUsage);
+    } else {
+      return NotFound();
+    }
+  }
+
+  [HttpPatch("close/{id}")]
+
+  public IActionResult Close(int id)
+  {
+    var dispenserUsage = this._usageRepository.GetById(id);
+    var dispenserId = dispenserUsage!.DispenserId;
+    var dispenser = this._dispenserRepository.GetById(dispenserId);
 
     if (dispenserUsage != null && dispenser != null) {
 
@@ -67,10 +97,13 @@ public class UsageController : ControllerBase
       dispenserUsage.Amount = amountDispensed;
       dispenserUsage.Cost = cost;
 
+      dispenser.TimesUsed +=1;
       dispenser.TotalAmount += amountDispensed; 
       dispenser.TotalCost += cost;
+      dispenser.Status = !dispenser.Status;
 
-      this._DBContext.SaveChanges();
+      this._usageRepository.Update(dispenserUsage);
+      this._dispenserRepository.Update(dispenser);
       return Ok(dispenserUsage);
     } else {
       return NotFound();
